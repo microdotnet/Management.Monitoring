@@ -1,0 +1,20 @@
+name: local_microdotnet_monitoring
+
+services:
+    local.microdotnet.monitoring.otelcollector:
+        container_name: local.microdotnet.monitoring.otelcollector
+        hostname: local.microdotnet.monitoring.otelcollector
+        image: otel/opentelemetry-collector:0.111.0
+        restart: always
+        volumes:
+            - .\otelcollector\otel-config.yml:/etc/otelcol/config.yaml
+        networks:
+            - local.microdotnet.monitoring
+        ports:
+            - 4317:4317
+            - 4318:4318
+
+networks:
+    local.microdotnet.monitoring:
+        name: local.microdotnet.monitoring
+        external: true

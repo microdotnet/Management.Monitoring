@@ -1,0 +1,32 @@
+receivers:
+    otlp:
+        protocols:
+            http:
+                endpoint: 0.0.0.0:4318
+            grpc:
+                endpoint: 0.0.0.0:4317
+
+exporters:
+    debug:
+        # verbosity: detailed
+        # sampling_initial: 5
+        # sampling_thereafter: 200
+    # otlp:
+        # endpoint: <your-backend-endpoint> # Example: "localhost:4317"
+
+service:
+    pipelines:
+        traces:
+            receivers: [otlp]
+            exporters: [debug]
+            # exporters: [logging, otlp]
+
+        metrics:
+            receivers: [otlp]
+            exporters: [debug]
+            # exporters: [logging, otlp]
+
+        logs:
+            receivers: [otlp]
+            exporters: [debug]
+            # exporters: [logging, otlp]
