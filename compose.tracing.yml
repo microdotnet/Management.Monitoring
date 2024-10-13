@@ -1,0 +1,19 @@
+services:
+    local.microdotnet.monitoring.jaeger:
+        container_name: local.microdotnet.monitoring.jaeger
+        hostname: local.microdotnet.monitoring.jaeger
+        image: jaegertracing/all-in-one:latest
+        restart: always
+        ports:
+          - 16686:16686 # Jaeger UI
+        networks:
+          - local.microdotnet.monitoring
+
+    local.microdotnet.monitoring.zipkin:
+        container_name: local.microdotnet.monitoring.zipkin
+        hostname: local.microdotnet.monitoring.zipkin
+        image: openzipkin/zipkin:latest
+        ports:
+          - 9412:9411
+        networks:
+          - local.microdotnet.monitoring

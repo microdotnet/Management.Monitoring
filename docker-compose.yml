@@ -1,18 +1,57 @@
 name: local_microdotnet_monitoring
 
+include:
+  - compose.collector.yml
+  - compose.tracing.yml
+
 services:
-    local.microdotnet.monitoring.otelcollector:
-        container_name: local.microdotnet.monitoring.otelcollector
-        hostname: local.microdotnet.monitoring.otelcollector
-        image: otel/opentelemetry-collector:0.111.0
+    local.microdotnet.monitoring.prometheus:
+        container_name: local.microdotnet.monitoring.prometheus
+        hostname: local.microdotnet.monitoring.prometheus
+        image: prom/prometheus:latest
         restart: always
         volumes:
-            - .\otelcollector\otel-config.yml:/etc/otelcol/config.yaml
-        networks:
-            - local.microdotnet.monitoring
+          - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+        command: 
+          - '--config.file=/etc/prometheus/prometheus.yml'
+          - '--web.listen-address=:8080'
         ports:
-            - 4317:4317
-            - 4318:4318
+          - 8081:8080
+        environment:
+          - config.file=/etc/prometheus/prometheus.yml
+        networks:
+          - local.microdotnet.monitoring
+
+    local.microdotnet.monitoring.loki:
+        container_name: local.microdotnet.monitoring.loki
+        hostname: local.microdotnet.monitoring.loki
+        image: grafana/loki:latest
+        restart: always
+        command: [ "-config.file=/etc/loki/local-config.yaml" ]
+        networks:
+          - local.microdotnet.monitoring
+
+    local.microdotnet.monitoring.grafana:
+        container_name: local.microdotnet.monitoring.grafana
+        hostname: local.microdotnet.monitoring.grafana
+        image: grafana/grafana:latest
+        restart: always
+        ports:
+          - 3000:3000
+        volumes:
+          - ./grafana/datasources.yml:/etc/grafana/provisioning/datasources/datasources.yaml
+        # environment:
+          # - GF_AUTH_ANONYMOUS_ENABLED=true
+          # - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+          # - GF_AUTH_DISABLE_LOGIN_FORM=true
+        depends_on:
+          - local.microdotnet.monitoring.jaeger
+          - local.microdotnet.monitoring.zipkin
+          - local.microdotnet.monitoring.prometheus
+          - local.microdotnet.monitoring.loki
+          - local.microdotnet.monitoring.otelcollector
+        networks:
+          - local.microdotnet.monitoring
 
 networks:
     local.microdotnet.monitoring:
